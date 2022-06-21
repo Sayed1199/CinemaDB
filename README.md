@@ -1,4 +1,4 @@
-#CinemaDB
+# CinemaDB                        
 A Flutter project using Getx to view movies and series based on tmdb and omdb apis.                           
 the app shows trending, top rated, playing now and on theatre movies and series.       
 suuports search for both movies and series                  
