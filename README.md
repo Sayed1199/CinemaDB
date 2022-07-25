@@ -10,6 +10,7 @@ You Can see a vide of the app here.. https://mega.nz/file/YxQ32QKD#hovXZmjLiMGj5
 ![image](https://raw.github.com/Sayed1199/CinemaDB/main/Screenshots/vlcsnap-2022-07-26-02h44m28s980.png)
 ![image](https://raw.github.com/Sayed1199/CinemaDB/main/Screenshots/vlcsnap-2022-07-26-02h44m32s085.png)
 ![image](https://raw.github.com/Sayed1199/CinemaDB/main/Screenshots/vlcsnap-2022-07-26-02h44m43s588.png)
+![image](https://raw.github.com/Sayed1199/CinemaDB/main/Screenshots/vlcsnap-2022-07-26-02h45m27s212.png)
 ![image](https://raw.github.com/Sayed1199/CinemaDB/main/Screenshots/vlcsnap-2022-07-26-02h44m59s188.png)
 ![image](https://raw.github.com/Sayed1199/CinemaDB/main/Screenshots/vlcsnap-2022-07-26-02h45m02s486.png)
 ![image](https://raw.github.com/Sayed1199/CinemaDB/main/Screenshots/vlcsnap-2022-07-26-02h46m05s323.png)
