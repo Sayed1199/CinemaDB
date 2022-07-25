@@ -1,16 +1,6 @@
-# cinema_db
+# cinemaDB
+A Flutter Project for building an app using GetX to view movies and series details mainly based on the TMDB API
 
-A new Flutter project.
+![Alt text](/relative/path/to/img.jpg?raw=true "Optional Title")
 
-## Getting Started
-
-This project is a starting point for a Flutter application.
-
-A few resources to get you started if this is your first Flutter project:
-
-- [Lab: Write your first Flutter app](https://flutter.dev/docs/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://flutter.dev/docs/cookbook)
-
-For help getting started with Flutter, view our
-[online documentation](https://flutter.dev/docs), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+https://github.com/Sayed1199/CinemaDB/blob/main/Screenshots/vlcsnap-2022-07-26-02h43m58s021.png
