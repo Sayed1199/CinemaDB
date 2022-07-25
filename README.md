@@ -1,4 +1,4 @@
-# cinemaDB
+# CinemaDB
 A Flutter Project for building an app using GetX to view movies and series details mainly based on the TMDB API
 
 You Can see a vide of the app here.. https://mega.nz/file/YxQ32QKD#hovXZmjLiMGj5vv_-NT5kcr7JhqUc6q550RMjymElk8
