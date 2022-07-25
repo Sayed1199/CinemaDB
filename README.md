@@ -4,5 +4,5 @@ A Flutter Project for building an app using GetX to view movies and series detai
 You Can see a vide of the app here.. https://mega.nz/file/YxQ32QKD#hovXZmjLiMGj5vv_-NT5kcr7JhqUc6q550RMjymElk8
 
 
-https://raw.github.com/Sayed1199/CinemaDB/blob/main/Screenshots/vlcsnap-2022-07-26-02h43m58s021.png
+https://raw.github.com/Sayed1199/CinemaDB/main/Screenshots/vlcsnap-2022-07-26-02h43m58s021.png
 
