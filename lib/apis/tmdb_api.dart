@@ -1,6 +1,8 @@
 import 'dart:convert';
+import 'package:cinema_db/models/actor_model.dart';
 import 'package:cinema_db/models/collection_model.dart';
 import 'package:cinema_db/models/company_model.dart';
+import 'package:cinema_db/models/crew_model.dart';
 import 'package:cinema_db/models/genres_model.dart';
 import 'package:cinema_db/models/movide_ids_model.dart';
 import 'package:cinema_db/models/movie_image_model.dart';
@@ -350,6 +352,10 @@ class TmdbApi{
   Future<int> getPersonIDFromName(String maApiKey,String name)async{
     String url = baseUrl + 'search/person?api_key=$maApiKey&language=en-US&page=1&include_adult=true&query=$name';
     http.Response response = await http.get(Uri.parse(url),headers: null);
+    print("result: ${jsonDecode(response.body)['results']}");
+    if(jsonDecode(response.body)['results'].isEmpty){
+      return 0;
+    }else
     return jsonDecode(response.body)['results'][0]['id'];
   }
 
@@ -728,8 +734,8 @@ class TmdbApi{
   }
 
 
-  Future<List<MovieModel>> getPersonWorks(String mApikey,int id,String name)async{
-    List<MovieModel> moviesList=[];
+  Future<List<dynamic>> getPersonWorks(String mApikey,int id,String name)async{
+    List<dynamic> worksList=[];
     String preUrl = baseUrl + 'search/person?api_key=$mApikey&language=en-US&page=1&include_adult=true&query=$name';
     http.Response response = await http.get(Uri.parse(preUrl),headers: null);
     int totalPages = jsonDecode(response.body)['total_pages'];
@@ -742,13 +748,13 @@ class TmdbApi{
         if(jsonDecode(response.body)['results'][j]['id']==id){
           List<dynamic> myList = jsonDecode(response.body)['results'][j]['known_for'];
           myList.forEach((element) {
-            moviesList.add(MovieModel.fromJson(element));
+           worksList.add(element);
           });
         }
       }
 
     }
-    return moviesList;
+    return worksList;
   }
 
 
@@ -764,6 +770,50 @@ class TmdbApi{
   }
 
 
+  Future<List<ActorModel>> getFullCastMovies(int movieID,String apikey)async{
+    List<ActorModel> myList=[];
+    String url = baseUrl +"movie/$movieID/credits?api_key=$apikey";
+    http.Response response = await http.get(Uri.parse(url),headers: null);
+    List<dynamic> castList=jsonDecode(response.body)['cast'];
+    castList.forEach((element) {
+      myList.add(ActorModel.fromJson(element));
+    });
+    return myList;
+  }
+
+  Future<List<CrewModel>> getFullCrewMovies(int movieID,String apikey)async{
+    List<CrewModel> myList=[];
+    String url = baseUrl +"movie/$movieID/credits?api_key=$apikey";
+    http.Response response = await http.get(Uri.parse(url),headers: null);
+    List<dynamic> crewList=jsonDecode(response.body)['crew'];
+    crewList.forEach((element) {
+      myList.add(CrewModel.fromJson(element));
+    });
+    return myList;
+  }
+
+
+  Future<List<ActorModel>> getFullCastSeries(int movieID,String apikey)async{
+    List<ActorModel> myList=[];
+    String url = baseUrl +"tv/$movieID/credits?api_key=$apikey";
+    http.Response response = await http.get(Uri.parse(url),headers: null);
+    List<dynamic> castList=jsonDecode(response.body)['cast'];
+    castList.forEach((element) {
+      myList.add(ActorModel.fromJson(element));
+    });
+    return myList;
+  }
+
+  Future<List<CrewModel>> getFullCrewSeries(int movieID,String apikey)async{
+    List<CrewModel> myList=[];
+    String url = baseUrl +"tv/$movieID/credits?api_key=$apikey";
+    http.Response response = await http.get(Uri.parse(url),headers: null);
+    List<dynamic> crewList=jsonDecode(response.body)['crew'];
+    crewList.forEach((element) {
+      myList.add(CrewModel.fromJson(element));
+    });
+    return myList;
+  }
 
 
 

@@ -6,7 +6,7 @@ import 'package:get/get.dart';
 class PersonController extends GetxController{
 
   var imagesList = Rx<List<String>>([]);
-  var worksList = Rx<List<MovieModel>>([]);
+  var worksList = Rx<List<dynamic>>([]);
 
 
 

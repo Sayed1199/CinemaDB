@@ -1,5 +1,7 @@
 import 'package:cinema_db/apis/omdb_api.dart';
 import 'package:cinema_db/apis/tmdb_api.dart';
+import 'package:cinema_db/models/actor_model.dart';
+import 'package:cinema_db/models/crew_model.dart';
 import 'package:cinema_db/models/movie_details_model.dart';
 import 'package:cinema_db/models/person_model.dart';
 import 'package:cinema_db/models/tvShow_details_model.dart';
@@ -14,9 +16,9 @@ class SeriesInfoController extends GetxController{
   var seriesOmdbDetails = Rx<MovieDetailsModel?>(null);
   var tvShowPhotosList=Rx<List<String>>([]);
   var seriesVideosList = Rx<List<MovieVideosModel>>([]);
-  var castList= Rx<List<PersonModel>>([]);
-  var direcList=Rx<List<PersonModel>>([]);
   var seasonsList= Rx<List<TvSeasonDetailsModel>>([]);
+  var fullCastList=Rx<List<ActorModel>>([]);
+  var fullCrewList=Rx<List<CrewModel>>([]);
 
   Future<void> getTvShowSeasons(int id,int maxSeasons)async{
 
@@ -29,35 +31,10 @@ class SeriesInfoController extends GetxController{
     seasonsList.value=mseasonsList;
   }
 
-  Future<void> getCastDetails(List<String> namesList)async{
-    List<PersonModel> personsList=[];
-    for(String s in namesList){
-      int personID = await TmdbApi().getPersonIDFromName(dotenv.env['MOVIE_API_KEY']!, s);
-      PersonModel personModel = await TmdbApi().getPersonDetailsByID(dotenv.env['MOVIE_API_KEY']!, personID);
-      personsList.add(personModel);
-    }
-    castList.value = personsList;
-  }
-
-  Future<void> getDirectorsDetails(List<String> directorsList)async{
-    List<PersonModel> personsList=[];
-    String finalString ='';
-    for(String s in directorsList){
-      if(s.contains('(')){
-        finalString = s.substring(1,s.indexOf('('));
-      }else{
-        finalString = s;
-      }
-
-      int personID = await TmdbApi().getPersonIDFromName(dotenv.env['MOVIE_API_KEY']!, finalString);
-      PersonModel personModel = await TmdbApi().getPersonDetailsByID(dotenv.env['MOVIE_API_KEY']!, personID);
-      personsList.add(personModel);
-    }
-    direcList.value=personsList;
-  }
 
   Future<void> getSeriesVideos(int id)async{
     seriesVideosList.value = await TmdbApi().getTvShowVideos(dotenv.env['MOVIE_API_KEY']!, id);
+    if(seriesVideosList.value.isNotEmpty)
     print('video: ${seriesVideosList.value[0].key}');
   }
 
@@ -67,15 +44,23 @@ class SeriesInfoController extends GetxController{
     tvShowPhotosList.value = await TmdbApi().getTvShowImages(dotenv.env['MOVIE_API_KEY']!, id);
     await getTvShowSeasons(id,seriesdetails.value!.numberOfSeasons!);
     await getSeriesVideos(id);
-    await getCastDetails(seriesOmdbDetails.value!.actors!.split(','));
-    await getDirectorsDetails(
-        seriesOmdbDetails.value!.director!.contains(',')?
-        seriesOmdbDetails.value!.director!.split(','):
-        [seriesOmdbDetails.value!.director!]
-    );
+    if(seriesOmdbDetails.value != null) await getFullCast(id);
+    if(seriesOmdbDetails.value != null) {
+      await getFullCrewDetails(id);
+    }
     print('list: ${tvShowPhotosList.value.length}');
   }
 
+  Future<void>getFullCast(int id)async {
+    fullCastList.value = await TmdbApi().getFullCastSeries(id, dotenv.env['MOVIE_API_KEY']!);
+  }
+  Future<void> getFullCrewDetails(int id)async{
+    fullCrewList.value = await TmdbApi().getFullCrewSeries(id, dotenv.env['MOVIE_API_KEY']!);
+  }
+
+  Future<PersonModel> getActorAsPersonModel(int personID)async{
+    return await TmdbApi().getPersonDetailsByID(dotenv.env['MOVIE_API_KEY']!, personID);
+  }
 
 }
 

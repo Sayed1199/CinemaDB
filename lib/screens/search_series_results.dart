@@ -9,6 +9,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:get/get.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class SearchSeriesResults extends StatefulWidget {
   final String searchQuery;
@@ -68,74 +69,73 @@ class LessThan3Widget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Center(
-      child: SizedBox(
-        height: 350,
-        child: CupertinoScrollbar(
-          child: ListView.builder(
-              scrollDirection: Axis.horizontal,
-              itemCount: seriesList.length,
-              shrinkWrap: true,
-              itemBuilder: (context, index) =>
-                  GestureDetector(
-                    onTap: ()=>Get.to(()=>SeriesDetailsScreen(),arguments: seriesList[index]),
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 20),
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(35),
-                        child: Container(
-                          width: MediaQuery.of(context).size.width*0.5,
-                          child:(Stack(
-                            children: [
-                              seriesList[index].posterPath != null?
-                              Image.network(imageTmdbApiLink+ seriesList[index].posterPath!,fit: BoxFit.cover,filterQuality: FilterQuality.high,):
-                              Image.asset('assets/images/error.jpg'),
-                              Positioned(
-                                bottom: 0,
-                                left: 0,
-                                right: 0,
-                                child:Container(
-                                  height: 80,
-                                  decoration: BoxDecoration(
-                                      color: themeController.isDarkModeEnabled.value==false?
-                                      Colors.white.withOpacity(0.4):
-                                      Colors.black.withOpacity(0.4),
-                                      shape: BoxShape.rectangle,
-                                      borderRadius: BorderRadius.circular(35)
-                                  ),
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+       crossAxisAlignment: CrossAxisAlignment.center,
+       children:[
+         SizedBox(
+           height: MediaQuery.of(context).size.height*0.6,
+           width: MediaQuery.of(context).size.width,
+           child:  CupertinoScrollbar(
+           child: Padding(
+             padding: const EdgeInsets.only(top: 10,bottom: 10),
+             child: ListView.builder(
+                 scrollDirection: Axis.horizontal,
+                 itemCount: seriesList.length,
+                 shrinkWrap: true,
+                 itemBuilder: (context, index) =>
 
-                                  child: Column(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: [
-                                      Padding(
-                                        padding: const EdgeInsets.symmetric(horizontal: 5),
-                                        child: Text(seriesList[index].name!,textAlign: TextAlign.center,maxLines: 2,style: TextStyle(fontSize: 18),overflow: TextOverflow.ellipsis,),
-                                      ),
-                                      Text.rich(
-                                        TextSpan(
-                                            children:[
-                                              TextSpan(text: '${(double.parse((seriesList[index].voteAverage)!)/2).toStringAsFixed(1)}',style: TextStyle(fontSize: 20,fontWeight: FontWeight.w400,color: Colors.pinkAccent)),
-                                              TextSpan(text: ' / ',style: TextStyle(fontSize: 25,fontWeight: FontWeight.w800)),
-                                              TextSpan(text: '5',style: TextStyle(fontSize: 22,fontWeight: FontWeight.w600)),
-                                            ]
-                                        ),
-                                        textAlign: TextAlign.center,
+                             Column(
+                               children: [
+                                 GestureDetector(
+                                   onTap: (){
+                                     if(seriesList[index].posterPath!=null)
+                                       Get.to(()=>SeriesDetailsScreen(),arguments: seriesList[index]);
+                                   },
+                                   child: Padding(
+                                     padding: const EdgeInsets.symmetric(horizontal: 20),
+                                     child:  Container(
+                                       height: MediaQuery.of(context).size.height*0.5,
+                                         width: MediaQuery.of(context).size.width*0.6,
+                                         decoration: BoxDecoration(
+                                           shape: BoxShape.rectangle,
+                                           borderRadius: BorderRadius.circular(30),
+                                           image: DecorationImage(
+                                             filterQuality: FilterQuality.high,
+                                             fit: BoxFit.cover,
+                                             image:
+                                             NetworkImage(imageTmdbApiLink+ seriesList[index].posterPath!)
+                                           )
+                                         )
+                                     ),
+                                   ),
+                                 ),
 
-                                      ),
-                                    ],
-                                  ),
+                                 SizedBox(
+                                     width: MediaQuery.of(context).size.width/2,
+                                     child: Center(
+                                       child: Obx(()=>
+                                       Text(seriesList[index].name==null?'':seriesList[index].name!,
+                                         maxLines: 2,textAlign: TextAlign.center,overflow:TextOverflow.ellipsis, style: GoogleFonts.lato(
+                                             fontSize: 18,
+                                             color: themeController.isDarkModeEnabled.value?Colors.grey[100]:Colors.grey[900]
+                                         ),),
+                                 ),
+                                     ),),
 
-                                ),),
 
-                            ],
-                          )),
-                        ),
-                      ),
-                    ),
-                  )
-          ),
-        ),
-      ),
+                               ],
+                             ),
+
+
+
+
+                     )
+             ),
+           ),
+
+         ),
+       ],
     );
   }
 }

@@ -267,7 +267,7 @@ class _EpisodeDetailsState extends State<EpisodeDetails> {
                                       BoxShape.circle,
                                       image: DecorationImage(
                                           image: AssetImage(
-                                              'assets/images/service_out1.jpg'),
+                                              'assets/images/empty1.jpg'),
                                           fit: BoxFit
                                               .cover,
                                           filterQuality:

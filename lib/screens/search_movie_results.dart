@@ -75,6 +75,75 @@ class LessThan3Widget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children:[
+        SizedBox(
+          height: MediaQuery.of(context).size.height*0.6,
+          width: MediaQuery.of(context).size.width,
+          child:  CupertinoScrollbar(
+            child: Padding(
+                padding: const EdgeInsets.only(top: 10,bottom: 10),
+                child: ListView.builder(
+                  scrollDirection: Axis.horizontal,
+                  itemCount: moviesList.length,
+                  shrinkWrap: true,
+                  itemBuilder: (context, index) =>
+
+                      Column(
+                        children: [
+                          GestureDetector(
+                            onTap: (){
+                              if(moviesList[index].posterPath!=null)
+                                Get.to(()=>MovieDetails(),arguments: moviesList[index]);
+                            },
+                            child: Padding(
+                              padding: const EdgeInsets.symmetric(horizontal: 20),
+                              child:  Container(
+                                  height: MediaQuery.of(context).size.height*0.5,
+                                  width: MediaQuery.of(context).size.width*0.6,
+                                  decoration: BoxDecoration(
+                                      shape: BoxShape.rectangle,
+                                      borderRadius: BorderRadius.circular(30),
+                                      image: DecorationImage(
+                                          filterQuality: FilterQuality.high,
+                                          fit: BoxFit.cover,
+                                          image:
+                                          NetworkImage(imageTmdbApiLink+ moviesList[index].posterPath!)
+                                      )
+                                  )
+                              ),
+                            ),
+                          ),
+
+                          SizedBox(
+                            width: MediaQuery.of(context).size.width/2,
+                            child: Center(
+                              child: Obx(()=>
+                                  Text(moviesList[index].title==null?'':moviesList[index].title!,
+                                    maxLines: 2,textAlign: TextAlign.center,overflow:TextOverflow.ellipsis, style: GoogleFonts.lato(
+                                        fontSize: 18,
+                                        color: themeController.isDarkModeEnabled.value?Colors.grey[100]:Colors.grey[900]
+                                    ),),
+                              ),
+                            ),),
+
+
+                        ],
+                      ),
+
+
+
+
+                )
+            ),
+          ),
+
+        ),
+      ],
+    );
+    /*
     return Center(
       child: SizedBox(
         height: 350,
@@ -141,6 +210,8 @@ class LessThan3Widget extends StatelessWidget {
         ),
       ),
     );
+
+     */
   }
 }
 

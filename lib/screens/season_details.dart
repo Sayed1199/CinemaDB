@@ -102,9 +102,91 @@ class _SeasonDetailsState extends State<SeasonDetails> {
 
             Center(
               child: Padding(
+                padding: const EdgeInsets.fromLTRB(5,5,5,10),
+                child: SizedBox(
+                  height: MediaQuery.of(context).size.height*0.5,
+                  width: MediaQuery.of(context).size.width,
+                  child:
+                      ListView.builder(
+                        shrinkWrap: true,
+                        scrollDirection: Axis.horizontal,
+                        itemCount: seasonModel.episodes!.length,
+                        itemBuilder: (context,index){
+                          return Column(
+                            children: [
+                              GestureDetector(
+                                onTap: (){
+                                  Get.to(()=>EpisodeDetails(seriesID: widget.seriesID,seriesName: widget.seriesName, seasonNumber: widget.seasonNumber,
+                                    episodeNumber: index+1,),arguments: seasonModel.episodes![index],transition: Transition.circularReveal,curve: Curves.bounceInOut);
+                                },
+                                child: Padding(
+                                  padding: const EdgeInsets.symmetric(horizontal: 20),
+                                  child: seasonModel.episodes![index].stillPath==null? Container(
+                                      height: MediaQuery.of(context).size.height*0.4,
+                                      width: MediaQuery.of(context).size.width*0.5,
+                                      decoration: BoxDecoration(
+                                          shape: BoxShape.rectangle,
+                                          borderRadius: BorderRadius.circular(30),
+                                          image: DecorationImage(
+                                              filterQuality: FilterQuality.high,
+                                              fit: BoxFit.cover,
+                                              image:
+                                              AssetImage('assets/images/empty1.jpg')
+                                          )
+                                      )
+                                  ): Container(
+                                      height: MediaQuery.of(context).size.height*0.4,
+                                      width: MediaQuery.of(context).size.width*0.5,
+                                      decoration: BoxDecoration(
+                                          shape: BoxShape.rectangle,
+                                          borderRadius: BorderRadius.circular(30),
+                                          image: DecorationImage(
+                                              filterQuality: FilterQuality.high,
+                                              fit: BoxFit.cover,
+                                              image:
+                                              NetworkImage(imageTmdbApiLink+ seasonModel.episodes![index].stillPath!)
+                                          )
+                                      )
+                                  ),
+                                ),
+                              ),
+
+                              SizedBox(
+                                width: MediaQuery.of(context).size.width*0.4,
+                                child: Center(
+                                  child:
+                                      Text(seasonModel.episodes![index].name==null?'':seasonModel.episodes![index].name!,
+                                        maxLines: 2,textAlign: TextAlign.center,overflow:TextOverflow.ellipsis, style: GoogleFonts.lato(
+                                            fontSize: 16,
+                                            color: themeController.isDarkModeEnabled.value?Colors.grey[100]:Colors.grey[900]
+                                        ),),
+
+                                ),),
+
+                              SizedBox(
+                                child: Text.rich(
+                                  TextSpan(
+                                      children:[
+                                        TextSpan(text: '${(double.parse((seasonModel.episodes![index].voteAverage)!)/2).toStringAsFixed(1)}',style: TextStyle(fontSize: 18,fontWeight: FontWeight.w400,color: Colors.pinkAccent)),
+                                        TextSpan(text: ' / ',style: TextStyle(fontSize: 25,fontWeight: FontWeight.w800)),
+                                        TextSpan(text: '5',style: TextStyle(fontSize: 20,fontWeight: FontWeight.w600)),
+                                      ]
+                                  ),
+                                  textAlign: TextAlign.center,
+                                ),
+                              ),
+
+                            ],
+                          );
+                        },
+                  ),
+                ),
+              )
+              /*
+              Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 10),
                 child: SizedBox(
-                  height: 350,
+                  height: MediaQuery.of(context).size.height*0.5,
                   child: ListView.builder(
                     shrinkWrap: true,
                     scrollDirection: Axis.horizontal,
@@ -209,6 +291,7 @@ class _SeasonDetailsState extends State<SeasonDetails> {
                   ),
                 ),
               ),
+              */
             ),
 
             SizedBox(height: 20,),

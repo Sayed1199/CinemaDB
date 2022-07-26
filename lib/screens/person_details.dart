@@ -2,13 +2,18 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cinema_db/constants.dart';
 import 'package:cinema_db/controllers/person_controller.dart';
 import 'package:cinema_db/controllers/theme_controller.dart';
+import 'package:cinema_db/models/movie_model.dart';
 import 'package:cinema_db/models/person_model.dart';
+import 'package:cinema_db/models/tvShow_model.dart';
 import 'package:cinema_db/screens/full_image_view.dart';
 import 'package:cinema_db/screens/movie_details.dart';
+import 'package:cinema_db/screens/series_details.dart';
+import 'package:cinema_db/screens/series_screen.dart';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class FullPersonDetails extends StatefulWidget {
   final PersonModel personModel;
@@ -242,112 +247,95 @@ class _FullPersonDetailsState extends State<FullPersonDetails> {
                     child: CircularProgressIndicator(),
                   );
                 else {
-                  return Center(
-                      child: Container(
-                        padding: EdgeInsets.symmetric(horizontal: 10),
-                        height: 300,
-                        child: ListView.builder(
-                          shrinkWrap: true,
-                          scrollDirection: Axis.horizontal,
-                          itemCount: personController.worksList.value.length,
-                          itemBuilder: (context, index) {
-                            return GestureDetector(
-                              onTap: (){
-                                Get.to(()=>MovieDetails(),arguments: personController.worksList.value[index]);
-                              },
-                              child: Container(
-                                child: Stack(
-                                  children: [
-                                    CachedNetworkImage(
-                                      imageUrl: imageTmdbApiLink +
-                                          personController.worksList.value[index].posterPath!,
-                                      progressIndicatorBuilder:
-                                          (context, url, downloadProgress) => Center(
-                                          child: CircularProgressIndicator(
-                                              value: downloadProgress.progress)),
-                                      errorWidget: (context, url, err) => Container(
-                                        width: MediaQuery.of(context).size.width / 2,
-                                        margin: EdgeInsets.symmetric(horizontal: 5.0),
-                                        decoration: BoxDecoration(
-                                          shape: BoxShape.rectangle,
-                                          borderRadius: BorderRadius.all(Radius.circular(35)),
-                                          color: Colors.transparent,
-                                          image: DecorationImage(
-                                            image:
-                                            AssetImage('assets/images/error.jpg'),
-                                            fit: BoxFit.contain,
-                                          ),
-                                        ),
-                                      ),
-                                      imageBuilder: (context, imageProvider) => Stack(
-                                        children: [
-                                          Container(
-                                            width: MediaQuery.of(context).size.width / 2,
-                                            margin: EdgeInsets.symmetric(horizontal: 5.0),
-                                            decoration: BoxDecoration(
+                  return Padding(
+                    padding: const EdgeInsets.fromLTRB(5,5,5,10),
+                    child: SizedBox(
+                      height: MediaQuery.of(context).size.height*0.5,
+                      width: MediaQuery.of(context).size.width,
+                      child: Obx(()=>
+                          ListView.builder(
+                            shrinkWrap: true,
+                            scrollDirection: Axis.horizontal,
+                            itemCount: personController.worksList.value.length,
+                            itemBuilder: (context,index){
+                              return Column(
+                                children: [
+                                  GestureDetector(
+                                    onTap: (){
+                                      if(personController.worksList.value[index]['media_type']=='movie'){
+                                        Get.to(()=>MovieDetails(),arguments: MovieModel.fromJson(personController.worksList.value[index] as Map<String,dynamic>));
+                                      }else{
+                                        Get.to(()=>SeriesDetailsScreen(),arguments: TvShowModel.fromJson(personController.worksList.value[index] as Map<String,dynamic>));
+                                      }
+                                     //
+                                    },
+                                    child: Padding(
+                                      padding: const EdgeInsets.symmetric(horizontal: 20),
+                                      child: personController.worksList.value[index]['poster_path'] ==null? Container(
+                                          height: MediaQuery.of(context).size.height*0.4,
+                                          width: MediaQuery.of(context).size.width*0.5,
+                                          decoration: BoxDecoration(
                                               shape: BoxShape.rectangle,
-                                              borderRadius:
-                                              BorderRadius.all(Radius.circular(35)),
-                                              color: Colors.transparent,
+                                              borderRadius: BorderRadius.circular(30),
                                               image: DecorationImage(
-                                                image: imageProvider,
-                                                fit: BoxFit.cover,
-                                              ),
-                                            ),
-                                          ),
-                                        ],
+                                                  filterQuality: FilterQuality.high,
+                                                  fit: BoxFit.cover,
+                                                  image:
+                                                  AssetImage('assets/images/empty1.jpg')
+                                              )
+                                          )
+                                      ): Container(
+                                          height: MediaQuery.of(context).size.height*0.4,
+                                          width: MediaQuery.of(context).size.width*0.5,
+                                          decoration: BoxDecoration(
+                                              shape: BoxShape.rectangle,
+                                              borderRadius: BorderRadius.circular(30),
+                                              image: DecorationImage(
+                                                  filterQuality: FilterQuality.high,
+                                                  fit: BoxFit.cover,
+                                                  image:
+                                                  NetworkImage(imageTmdbApiLink+ personController.worksList.value[index]['poster_path'])
+                                              )
+                                          )
                                       ),
                                     ),
+                                  ),
 
-                                    Positioned(
-                                      bottom: 0,
-                                      left: 5,
-                                      width: MediaQuery.of(context).size.width/2,
+                                  SizedBox(
+                                    width: MediaQuery.of(context).size.width*0.4,
+                                    child: Center(
                                       child: Obx(()=>
-                                          Container(
-                                            height: 100,
-                                            decoration: BoxDecoration(
-                                                color: themeController.isDarkModeEnabled.value==false?
-                                                Colors.white.withOpacity(0.4):
-                                                Colors.black.withOpacity(0.4),
-                                                shape: BoxShape.rectangle,
-                                                borderRadius: BorderRadius.circular(35)
-                                            ),
-
-                                            child: Column(
-                                              mainAxisAlignment: MainAxisAlignment.center,
-                                              children: [
-                                                Padding(
-                                                  padding: const EdgeInsets.symmetric(horizontal: 5),
-                                                  child: Obx(()=> Text( personController.worksList.value[index].title==null?'':personController.worksList.value[index].title!,textAlign: TextAlign.center,maxLines: 2,style: TextStyle(fontSize: 18),overflow: TextOverflow.ellipsis,)),
-                                                ),
-                                                Obx(()=>
-                                                    Text.rich(
-                                                      TextSpan(
-                                                          children:[
-                                                            TextSpan(text: '${(double.parse(( personController.worksList.value[index].voteAverage)!)/2).toStringAsFixed(1)}',style: TextStyle(fontSize: 20,fontWeight: FontWeight.w400,color: Colors.pinkAccent)),
-                                                            TextSpan(text: ' / ',style: TextStyle(fontSize: 25,fontWeight: FontWeight.w800)),
-                                                            TextSpan(text: '5',style: TextStyle(fontSize: 22,fontWeight: FontWeight.w600)),
-                                                          ]
-                                                      ),
-                                                      textAlign: TextAlign.center,
-                                                    ),
-                                                ),
-                                              ],
-                                            ),
-
-                                          ),
+                                          Text(personController.worksList.value[index]['media_type']=='movie'?
+                                          personController.worksList.value[index]['title']:personController.worksList.value[index]['name'],
+                                            maxLines: 2,textAlign: TextAlign.center,overflow:TextOverflow.ellipsis, style: GoogleFonts.lato(
+                                                fontSize: 18,
+                                                color: themeController.isDarkModeEnabled.value?Colors.grey[100]:Colors.grey[900]
+                                            ),),
                                       ),
+                                    ),),
 
+                                  SizedBox(
+                                    width: MediaQuery.of(context).size.width*0.4,
+                                    child: Obx(()=>
+                                        Text.rich(
+                                          TextSpan(
+                                              children:[
+                                                TextSpan(text: '${(personController.worksList.value[index]['vote_average']/2).toStringAsFixed(1)}',style: TextStyle(fontSize: 16,fontWeight: FontWeight.w400,color: Colors.pinkAccent)),
+                                                TextSpan(text: ' / ',style: TextStyle(fontSize: 25,fontWeight: FontWeight.w800)),
+                                                TextSpan(text: '5',style: TextStyle(fontSize: 18,fontWeight: FontWeight.w600)),
+                                              ]
+                                          ),
+                                          textAlign: TextAlign.center,
+                                        ),
                                     ),
+                                  ),
 
-                                  ],
-                                ),
-                              ),
-                            );
-                          },
-                        ),
-                      )
+                                ],
+                              );
+                            },
+                          ),
+                      ),
+                    ),
                   );
                 }
               }),

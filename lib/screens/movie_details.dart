@@ -1,10 +1,12 @@
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:cinema_db/apis/tmdb_api.dart';
 import 'package:cinema_db/constants.dart';
 import 'package:cinema_db/controllers/movie_info_controller.dart';
 import 'package:cinema_db/controllers/saved_movies_controller.dart';
 import 'package:cinema_db/controllers/theme_controller.dart';
 import 'package:cinema_db/controllers/watch_controller.dart';
 import 'package:cinema_db/models/movie_model.dart';
+import 'package:cinema_db/models/person_model.dart';
 import 'package:cinema_db/screens/person_details.dart';
 import 'package:cinema_db/services/database.dart';
 import 'package:cinema_db/widgets/loading_widget.dart';
@@ -17,6 +19,8 @@ import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+ThemeController themeController = Get.put(ThemeController());
+
 class MovieDetails extends StatefulWidget {
   const MovieDetails({Key? key}) : super(key: key);
 
@@ -26,7 +30,6 @@ class MovieDetails extends StatefulWidget {
 
 class _MovieDetailsState extends State<MovieDetails> {
   MovieModel movie = Get.arguments;
-  ThemeController themeController = Get.put(ThemeController());
   MovieInfoController infoController = Get.put(MovieInfoController());
   SaveMoviesController saveController = Get.put(SaveMoviesController());
   WatchController watchController = Get.put(WatchController());
@@ -135,7 +138,7 @@ class _MovieDetailsState extends State<MovieDetails> {
                               ))
                         ]),
                       )
-                    : LoadingWidget(),
+                    : Container(),
               ),
 
               Builder(
@@ -168,37 +171,41 @@ class _MovieDetailsState extends State<MovieDetails> {
                               )),
                         ),
                       ),
-                    ):LoadingWidget(),
+                    ):Container(),
                   );
                 }
               ),
 
-              Padding(
-                padding: EdgeInsets.symmetric(vertical: 10, horizontal: 10),
-                child: Text(
-                  'Plot Summary',
-                  style: Theme.of(context).textTheme.headline5,
-                ),
+
+                movie.overview ==null ? Container(): Padding(
+                  padding: EdgeInsets.symmetric(vertical: 10, horizontal: 10),
+                  child: Text(
+                    'Plot Summary',
+                    style: Theme.of(context).textTheme.headline5,
+                  ),
+
               ),
               Padding(
                 padding: EdgeInsets.symmetric(
                   horizontal: 20,
                 ),
                 child: Text(
-                  movie.overview!,
+                  movie.overview==null?'': movie.overview!,
                   style: TextStyle(fontSize: 15),
                 ),
               ),
               SizedBox(
                 height: 10,
               ),
-              Padding(
-                padding: EdgeInsets.symmetric(vertical: 10, horizontal: 10),
-                child: Text(
-                  'Photos',
-                  style: Theme.of(context).textTheme.headline5,
+                  infoController.imagesList.value.isEmpty?Container():
+                 Padding(
+                  padding: EdgeInsets.symmetric(vertical: 10, horizontal: 10),
+                  child: Text(
+                    'Photos',
+                    style: Theme.of(context).textTheme.headline5,
+                  ),
                 ),
-              ),
+
               SizedBox(
                 height: 5,
               ),
@@ -206,14 +213,14 @@ class _MovieDetailsState extends State<MovieDetails> {
                 builder: (context) {
                   infoController.getImages(movie.id!);
                   return Obx(()=> infoController.imagesList.value.isNotEmpty?
-                  CarouselImagesWidget(photosList: infoController.imagesList.value):LoadingWidget());
+                  CarouselImagesWidget(photosList: infoController.imagesList.value):Container());
                 }
               ),
               SizedBox(
                 height: 10,
               ),
 
-              Padding(
+                  infoController.movieVideosList.value.isEmpty? Container():  Padding(
                 padding: EdgeInsets.symmetric(vertical: 10, horizontal: 10),
                 child: Text(
                   'Trailer',
@@ -227,7 +234,7 @@ class _MovieDetailsState extends State<MovieDetails> {
                 builder: (context) {
                   infoController.getMovieVideos(movie.id!);
                   return Obx(()=> infoController.movieVideosList.value.isNotEmpty?
-                  CarouselVideosWidget(videosList: infoController.movieVideosList.value):LoadingWidget());
+                  CarouselVideosWidget(videosList: infoController.movieVideosList.value):Container());
                 }
               ),
               SizedBox(
@@ -239,34 +246,39 @@ class _MovieDetailsState extends State<MovieDetails> {
                 builder: (context) {
                   infoController.initializeController(movie.id!);
                   return Obx(()=>
-                     infoController.castList.value.isEmpty
-                        ? LoadingWidget() : CastWidget(infoController: infoController)
+                     infoController.fullCastList.value.isEmpty
+                        ? Container() :
+                     FullCastWidget(movieInfoController: infoController)
                   );
                 }
               ),
-              Padding(
+                  Obx(()=>
+                     infoController.fullCrewList.value.isEmpty?Container():  Padding(
                 padding: EdgeInsets.only(left: 0),
                 child: Column(
-                  children: [
-                    Text(
-                      'Director(s)',
-                      style: Theme.of(context).textTheme.headline5,
-                    ),
-                     Padding(
-                      padding: const EdgeInsets.only(left: 20, right: 10),
-                      child: SizedBox(
-                        height: 130,
-                        child: Obx(()=>
-                        infoController.direcList.value.isEmpty
-                              ? LoadingWidget()
-                              : DirectorsWidget(infoController: infoController)
+                    children: [
+                      Text(
+                        'Crew',
+                        style: Theme.of(context).textTheme.headline5,
+                      ),
+                       Padding(
+                        padding: const EdgeInsets.only(left: 20, right: 10),
+                        child: SizedBox(
+                          height: 160,
+                          child: Obx(()=>
+                          infoController.fullCrewList.value.isEmpty
+                                ? LoadingWidget()
+                                : DirectorsWidget(infoController: infoController)
+                          ),
                         ),
                       ),
-                    ),
-                  ],
+                    ],
                 ),
               ),
-              Padding(
+                  ),
+                  infoController.movieDetailsModel.value==null ||
+                      infoController.movieDetailsModel.value!.writer==''? Container():
+                  Padding(
                 padding: EdgeInsets.symmetric(vertical: 5, horizontal: 10),
                 child: Text(
                   'Writers & Authors',
@@ -275,7 +287,7 @@ class _MovieDetailsState extends State<MovieDetails> {
               ),
               Obx(()=>
                  infoController.movieDetailsModel.value ==null?
-         LoadingWidget():Padding(
+         Container():Padding(
                     padding: EdgeInsets.symmetric(
                       horizontal: 20,
                     ),
@@ -287,11 +299,13 @@ class _MovieDetailsState extends State<MovieDetails> {
               ),
 
               SizedBox(height: 10),
-              Padding(
-                padding: EdgeInsets.symmetric(vertical: 5, horizontal: 10),
-                child: Text(
-                  'Release Dates',
-                  style: Theme.of(context).textTheme.headline5,
+              Obx(()=>
+              infoController.releaseDatesList.value.isEmpty?Container(): Padding(
+                  padding: EdgeInsets.symmetric(vertical: 5, horizontal: 10),
+                  child: Text(
+                    'Release Dates',
+                    style: Theme.of(context).textTheme.headline5,
+                  ),
                 ),
               ),
 
@@ -304,9 +318,9 @@ class _MovieDetailsState extends State<MovieDetails> {
                       Padding(
                         padding: const EdgeInsets.only(bottom: 15,left: 25, right: 10),
                         child: SizedBox(
-                            height: 200,
+                            height: infoController.releaseDatesList.value.isEmpty?0:200,
                             child: infoController.releaseDatesList.value.isEmpty
-                                ? LoadingWidget(): ReleaseDatesWidget(infoController: infoController)
+                                ? Container(): ReleaseDatesWidget(infoController: infoController)
                         ),
                       ),
                   );
@@ -328,9 +342,7 @@ class _MovieDetailsState extends State<MovieDetails> {
 
                   Obx(()=>
                     infoController.movieDetailsModel.value ==null?
-                    Center(
-                        child: CircularProgressIndicator(),
-                      )
+                   Container()
                      : Padding(
                 padding: EdgeInsets.symmetric(
                     horizontal: 20,
@@ -353,9 +365,7 @@ class _MovieDetailsState extends State<MovieDetails> {
               ),
                   Obx(()=>
                      infoController.movieDetailsModel.value ==null?
-                    Center(
-                      child: CircularProgressIndicator(),
-                    ) : Padding(
+                   Container(): Padding(
                 padding: EdgeInsets.symmetric(
                     horizontal: 20,
                 ),
@@ -377,9 +387,7 @@ class _MovieDetailsState extends State<MovieDetails> {
               ),
                   Obx(()=>
                      infoController.movieDetailsModel.value ==null?
-                    Center(
-                      child: CircularProgressIndicator(),
-                    ) : Padding(
+                     Container() : Padding(
                 padding: EdgeInsets.symmetric(
                     horizontal: 20,
                 ),
@@ -423,7 +431,12 @@ class BuildBackdrop extends StatelessWidget {
                 color: Theme.of(context).scaffoldBackgroundColor,
                 borderRadius: BorderRadius.only(
                     bottomLeft: Radius.circular(50)),
-                image: DecorationImage(
+                image: movie.backdropPath==null?DecorationImage(
+                  image: AssetImage(
+                      'assets/images/empty1.jpg'),
+                  fit: BoxFit.cover,
+                  filterQuality: FilterQuality.high,
+                ): DecorationImage(
                   image: NetworkImage(
                       imageTmdbApiLink + movie.backdropPath!),
                   fit: BoxFit.cover,
@@ -597,9 +610,10 @@ class BuildBackdrop extends StatelessWidget {
   }
 }
 
-class CastWidget extends StatelessWidget {
-  final MovieInfoController infoController;
-  const CastWidget({Key? key,required this.infoController}) : super(key: key);
+
+class FullCastWidget extends StatelessWidget {
+  final MovieInfoController movieInfoController;
+  const FullCastWidget({Key? key,required this.movieInfoController}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -610,7 +624,7 @@ class CastWidget extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Text(
-            'Cast',
+            'FullCast',
             style: Theme.of(context).textTheme.headline5,
           ),
           SizedBox(
@@ -618,28 +632,32 @@ class CastWidget extends StatelessWidget {
           ),
           SizedBox(
             height: 130,
-            child: infoController.castList.value.isEmpty
-                ? LoadingWidget()
+            child: movieInfoController.fullCastList.value.isEmpty
+                ? Container()
                 : Center(
               child: Padding(
                 padding: const EdgeInsets.only(
                     left: 10.0, right: 10),
                 child: ListView.builder(
                     scrollDirection: Axis.horizontal,
-                    itemCount: infoController
-                        .castList.value.length,
+                    itemCount:  movieInfoController.fullCastList.value.length,
                     itemBuilder: (context, index) {
                       return GestureDetector(
-                          onTap: () {
+                          onTap: () async{
 
-                            Get.to(()=>FullPersonDetails(personModel:
-                            infoController.castList.value[index],));
+                            if(movieInfoController.fullCastList.value[index].id != null){
+                              PersonModel personModel = await movieInfoController.getActorAsPersonModel(movieInfoController.fullCastList.value[index].id!);
+                              Get.to(()=>FullPersonDetails(personModel:
+                              personModel,));
+                            }
+
+
 
                           },
                           child: CachedNetworkImage(
-                              imageUrl: imageTmdbApiLink +
-                                  infoController
-                                      .castList
+                              imageUrl: movieInfoController.fullCastList.value[index].profilePath==null?
+                              errorImageUrl: imageTmdbApiLink +
+                                  movieInfoController.fullCastList
                                       .value[index]
                                       .profilePath!,
                               progressIndicatorBuilder: (context,
@@ -652,10 +670,7 @@ class CastWidget extends StatelessWidget {
                               errorWidget: (context, url,
                                   err) =>
                                   Container(
-                                    width: MediaQuery.of(
-                                        context)
-                                        .size
-                                        .width,
+                                    width: 80,
                                     margin: EdgeInsets
                                         .symmetric(
                                         horizontal:
@@ -706,15 +721,13 @@ class CastWidget extends StatelessWidget {
                                           height: 10,
                                         ),
                                         Text(
-                                          infoController
-                                              .castList
+                                          movieInfoController.fullCastList
                                               .value[
                                           index]
                                               .name ==
                                               null
                                               ? ''
-                                              : infoController
-                                              .castList
+                                              : movieInfoController.fullCastList
                                               .value[
                                           index]
                                               .name!,
@@ -740,6 +753,7 @@ class CastWidget extends StatelessWidget {
   }
 }
 
+
 class DirectorsWidget extends StatelessWidget {
   final MovieInfoController infoController;
   const DirectorsWidget({Key? key,required this.infoController}) : super(key: key);
@@ -749,7 +763,7 @@ class DirectorsWidget extends StatelessWidget {
     return ListView.builder(
         scrollDirection: Axis.horizontal,
         itemCount:
-        infoController.direcList.value.length,
+        infoController.fullCrewList.value.length,
         itemBuilder:
             (context, index) => GestureDetector(
           onTap: () {
@@ -765,7 +779,7 @@ class DirectorsWidget extends StatelessWidget {
               MainAxisAlignment.center,
               children: [
                 infoController
-                    .direcList
+                    .fullCrewList
                     .value[index]
                     .profilePath !=
                     null
@@ -777,7 +791,7 @@ class DirectorsWidget extends StatelessWidget {
                           image: NetworkImage(
                             imageTmdbApiLink +
                                 infoController
-                                    .direcList
+                                    .fullCrewList
                                     .value[
                                 index]
                                     .profilePath!,
@@ -804,12 +818,12 @@ class DirectorsWidget extends StatelessWidget {
                 ),
                 Text(
                   infoController
-                      .direcList
+                      .fullCrewList
                       .value[index]
                       .name ==
                       null
                       ? ''
-                      : infoController.direcList
+                      : infoController.fullCrewList
                       .value[index].name!,
                   textAlign: TextAlign.center,
                   style: Theme.of(context)
@@ -817,6 +831,13 @@ class DirectorsWidget extends StatelessWidget {
                       .bodyText2,
                   maxLines: 2,
                 ),
+                SizedBox(height: 5,),
+                Text(infoController.fullCrewList.value[index].job!,textAlign: TextAlign.center,
+                    overflow: TextOverflow.ellipsis,maxLines: 2,style: GoogleFonts.lato(
+                  fontSize: 12,
+                  color: themeController.isDarkModeEnabled.value?Colors.grey[100]:Colors.grey[900]
+                ),)
+                
               ],
             ),
           ),

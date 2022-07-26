@@ -1,6 +1,8 @@
 import 'dart:convert';
 import 'package:cinema_db/apis/omdb_api.dart';
 import 'package:cinema_db/apis/tmdb_api.dart';
+import 'package:cinema_db/models/actor_model.dart';
+import 'package:cinema_db/models/crew_model.dart';
 import 'package:cinema_db/models/genres_model.dart';
 import 'package:cinema_db/models/movie_details_model.dart';
 import 'package:cinema_db/models/movie_model.dart';
@@ -16,12 +18,13 @@ class MovieInfoController extends GetxController{
 
   var movieDetailsModel = Rx<MovieDetailsModel?>(null);
   var releaseDates = Rx<List<ReleaseDatesModel>>([]);
-  var castList= Rx<List<PersonModel>>([]);
-  var direcList=Rx<List<PersonModel>>([]);
   var genresListAsStrings=Rx<List<String>>([]);
   var imagesList = Rx<List<String>>([]);
   var movieVideosList = Rx<List<MovieVideosModel>>([]);
   var releaseDatesList = Rx<List<Map<String,dynamic>>>([]);
+  var fullCastList=Rx<List<ActorModel>>([]);
+  var fullCrewList=Rx<List<CrewModel>>([]);
+
 
 
 
@@ -70,43 +73,34 @@ class MovieInfoController extends GetxController{
     genresListAsStrings.value=outputList;
   }
 
-  Future<void> getCastDetails(List<String> namesList)async{
-    print('NamesList: ${namesList}');
-    List<PersonModel> personsList=[];
-    for(String s in namesList){
-      int personID = await TmdbApi().getPersonIDFromName(dotenv.env['MOVIE_API_KEY']!, s);
-      PersonModel personModel = await TmdbApi().getPersonDetailsByID(dotenv.env['MOVIE_API_KEY']!, personID);
-      personsList.add(personModel);
-    }
-    castList.value = personsList;
+
+  Future<void> getFullCastDetails(int movieID)async{
+    fullCastList.value = await TmdbApi().getFullCastMovies(movieID, dotenv.env['MOVIE_API_KEY']!);
+  }
+  Future<void> getFullCrewDetails(int movieID)async{
+    fullCrewList.value = await TmdbApi().getFullCrewMovies(movieID, dotenv.env['MOVIE_API_KEY']!);
   }
 
-  Future<void> getDirectorsDetails(List<String> directorsList)async{
-    List<PersonModel> personsList=[];
-    String finalString ='';
-    for(String s in directorsList){
-      if(s.contains('(')){
-        finalString = s.substring(1,s.indexOf('('));
-      }else{
-        finalString = s;
-      }
-
-      int personID = await TmdbApi().getPersonIDFromName(dotenv.env['MOVIE_API_KEY']!, finalString);
-      PersonModel personModel = await TmdbApi().getPersonDetailsByID(dotenv.env['MOVIE_API_KEY']!, personID);
-      personsList.add(personModel);
-    }
-    direcList.value=personsList;
+  Future<PersonModel> getActorAsPersonModel(int personID)async{
+    return await TmdbApi().getPersonDetailsByID(dotenv.env['MOVIE_API_KEY']!, personID);
   }
+
+
 
 
   Future<void> initializeController(int id)async{
     MovieModel movieDetails = await TmdbApi().getMovieDetails(dotenv.env['MOVIE_API_KEY']!,id);
+    if(movieDetails.imdbId != null)
     movieDetailsModel.value = await OmdbApi().getMovieDetails(dotenv.env['MOVIE_DETAILS_API_KEY']!, movieDetails.imdbId!);
-    await getCastDetails(movieDetailsModel.value!.actors!.split(','));
-    await getDirectorsDetails(movieDetailsModel.value!.director!.contains(',')?
-    movieDetailsModel.value!.director!.split(','):
-    [movieDetailsModel.value!.director!]
-    );
+   if(movieDetailsModel.value!=null){
+     await getFullCastDetails(id);
+   }
+    if(movieDetailsModel.value!=null) {
+      if(movieDetailsModel.value != null){
+        await getFullCrewDetails(id);
+      }
+
+    }
 
   }
 

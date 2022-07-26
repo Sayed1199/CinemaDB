@@ -1,9 +1,16 @@
-# CinemaDB                        
-A Flutter project using Getx to view movies and series based on tmdb and omdb apis.                           
-the app shows trending, top rated, playing now and on theatre movies and series.       
-suuports search for both movies and series                  
-shows each series with episodes and episodes info                      
-shows actors info and previous works                    
-a future ability to watch movies and series (coming soon).
-u can see the app here...                         
-https://mega.nz/file/NpwTCKDB#AMdCZm-cPJYXyaHDAAe2LIpjaGb_ssm_pafKtNgaf60
+# cinema_db
+
+A new Flutter project.
+
+## Getting Started
+
+This project is a starting point for a Flutter application.
+
+A few resources to get you started if this is your first Flutter project:
+
+- [Lab: Write your first Flutter app](https://flutter.dev/docs/get-started/codelab)
+- [Cookbook: Useful Flutter samples](https://flutter.dev/docs/cookbook)
+
+For help getting started with Flutter, view our
+[online documentation](https://flutter.dev/docs), which offers tutorials,
+samples, guidance on mobile development, and a full API reference.

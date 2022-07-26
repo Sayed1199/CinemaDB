@@ -3,6 +3,7 @@ import 'package:cinema_db/constants.dart';
 import 'package:cinema_db/controllers/save_series_controller.dart';
 import 'package:cinema_db/controllers/series_info_controller.dart';
 import 'package:cinema_db/controllers/theme_controller.dart';
+import 'package:cinema_db/models/person_model.dart';
 import 'package:cinema_db/models/tvShow_model.dart';
 import 'package:cinema_db/screens/person_details.dart';
 import 'package:cinema_db/screens/season_details.dart';
@@ -249,7 +250,7 @@ class _SeriesDetailsScreenState extends State<SeriesDetailsScreen> {
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     Text(
-                                      tvshow.name!,
+                                       tvshow.name!,
                                       maxLines: 2,
                                       overflow: TextOverflow.ellipsis,
                                       style: GoogleFonts.lato(
@@ -264,7 +265,7 @@ class _SeriesDetailsScreenState extends State<SeriesDetailsScreen> {
                                     Row(
                                       children: [
                                         Text(
-                                          '${tvshow.firstAirDate}  - ',
+                                          '${tvshow.firstAirDate ==null? '':tvshow.firstAirDate}  - ',
                                         ),
                                         SizedBox(
                                           width: 5,
@@ -282,6 +283,7 @@ class _SeriesDetailsScreenState extends State<SeriesDetailsScreen> {
                                       children: [
                                         Text(
                                           infoController
+                                              .seriesOmdbDetails.value!.rated ==null? '': infoController
                                               .seriesOmdbDetails.value!.rated!,
                                         ),
                                         SizedBox(
@@ -289,7 +291,8 @@ class _SeriesDetailsScreenState extends State<SeriesDetailsScreen> {
                                         ),
                                         Text(
                                           infoController.seriesOmdbDetails
-                                                  .value!.runtime! +
+                                                  .value!.runtime==null? '': infoController.seriesOmdbDetails
+                                              .value!.runtime!+
                                               ' / Ep',
                                           style: TextStyle(),
                                         ),
@@ -363,8 +366,7 @@ class _SeriesDetailsScreenState extends State<SeriesDetailsScreen> {
                   );
                 }),
 
-                Builder(builder: (context) {
-                  return Obx(
+               Obx(
                     () => infoController.seriesOmdbDetails.value != null
                         ? Padding(
                             padding: EdgeInsets.symmetric(vertical: 0),
@@ -373,6 +375,7 @@ class _SeriesDetailsScreenState extends State<SeriesDetailsScreen> {
                               child: ListView.builder(
                                 scrollDirection: Axis.horizontal,
                                 itemCount: infoController
+                                    .seriesOmdbDetails.value==null?0: infoController
                                     .seriesOmdbDetails.value!.genre!
                                     .split(',')
                                     .length,
@@ -397,20 +400,23 @@ class _SeriesDetailsScreenState extends State<SeriesDetailsScreen> {
                               ),
                             ),
                           )
-                        : Center(
-                            child: CircularProgressIndicator(),
-                          ),
-                  );
-                }),
+                        : Container()
+                  ),
 
-                Padding(
-                  padding: EdgeInsets.symmetric(vertical: 10, horizontal: 10),
-                  child: Text(
-                    'HomePage',
-                    style: Theme.of(context).textTheme.headline5,
+
+                Obx(()=>
+                   infoController.seriesdetails.value ==null || infoController.seriesdetails.value!.homepage==''?Container():
+                   infoController.seriesdetails.value!.homepage ==null ? Container(): Padding(
+                    padding: EdgeInsets.symmetric(vertical: 10, horizontal: 10),
+                    child: Text(
+                      'HomePage',
+                      style: Theme.of(context).textTheme.headline5,
+                    ),
                   ),
                 ),
-                Padding(
+        Obx(()=>
+        infoController.seriesdetails.value==null || infoController.seriesdetails.value!.homepage==''?Container():
+        infoController.seriesdetails.value!.homepage ==null ? Container(): Padding(
                   padding: EdgeInsets.symmetric(
                     horizontal: 20,
                   ),
@@ -426,17 +432,18 @@ class _SeriesDetailsScreenState extends State<SeriesDetailsScreen> {
                               style:
                                   TextStyle(fontSize: 14, color: Colors.blue),
                             )
-                          : Center(
-                              child: CircularProgressIndicator(),
-                            ),
+                          : Container(
+                        width: 0,
+                        height: 0,
+                      )
                     ),
                   ),
-                ),
+                ),),
                 SizedBox(
                   height: 10,
                 ),
 
-                Padding(
+                tvshow.overview == null || tvshow.overview==''? Container(): Padding(
                   padding: EdgeInsets.symmetric(vertical: 10, horizontal: 10),
                   child: Text(
                     'Plot Summary',
@@ -447,7 +454,7 @@ class _SeriesDetailsScreenState extends State<SeriesDetailsScreen> {
                   padding: EdgeInsets.symmetric(
                     horizontal: 20,
                   ),
-                  child: Text(
+                  child: tvshow.overview == null || tvshow.overview==''? Container(): Text(
                     tvshow.overview!,
                     style: TextStyle(fontSize: 15),
                   ),
@@ -469,9 +476,10 @@ class _SeriesDetailsScreenState extends State<SeriesDetailsScreen> {
                 Obx(() => infoController.tvShowPhotosList.value.isNotEmpty
                     ? CarouselImagesWidget(
                         photosList: infoController.tvShowPhotosList.value)
-                    : Center(
-                        child: CircularProgressIndicator(),
-                      )),
+                    : Container(
+                  width: 0,
+                  height: 0,
+                )),
 
                 SizedBox(
                   height: 10,
@@ -490,121 +498,111 @@ class _SeriesDetailsScreenState extends State<SeriesDetailsScreen> {
 
                 Obx(()=>
                     infoController.seasonsList.value.isEmpty?
-                        Center(
-                          child: CircularProgressIndicator(),
-                        ):
+                       Container(
+                         width: 0,
+                         height: 0,
+                       ):
                         Center(
                           child: Padding(
                             padding: const EdgeInsets.symmetric(horizontal: 10),
                             child: SizedBox(
-                              height: 350,
+                              height: MediaQuery.of(context).size.height*0.5,
+                              width: MediaQuery.of(context).size.width,
                               child: ListView.builder(
                                     shrinkWrap: true,
                                     scrollDirection: Axis.horizontal,
                                     itemCount: infoController.seasonsList.value.length,
                                     itemBuilder: (context,index){
-                                      return GestureDetector(
-                                        onTap: (){
-                                          Get.to(()=> SeasonDetails(seriesID: tvshow.id!,
-                                            seriesName: tvshow.name!,
-                                          seasonNumber:index+1,
-                                          ),
-                                              arguments: infoController.seasonsList.value[index],transition: Transition.circularReveal,curve: Curves.bounceInOut);
-
-
-                                        }, child: Container(
-                                          child: Stack(
-                                            children: [
-                                              CachedNetworkImage(imageUrl: imageTmdbApiLink+infoController.seasonsList.value[index].posterPath!,
-                                                progressIndicatorBuilder: (context, url, downloadProgress) =>
-                                                    Center(child: CircularProgressIndicator(value: downloadProgress.progress)),
-                                                errorWidget: (context,url,err)=>Container(
-                                                  width: MediaQuery.of(context).size.width*0.6,
-                                                  margin: EdgeInsets.symmetric(horizontal: 5.0),
+                                      return Column(
+                                        children: [
+                                          GestureDetector(
+                                            onTap: (){
+                                              if(infoController.seasonsList.value[index].posterPath != null)
+                                                Get.to(()=> SeasonDetails(seriesID: tvshow.id!,
+                                                  seriesName: tvshow.name!,
+                                                  seasonNumber:index+1,
+                                                ),
+                                                    arguments: infoController.seasonsList.value[index],transition: Transition.circularReveal,curve: Curves.bounceInOut);
+                                            },
+                                            child: Padding(
+                                              padding: const EdgeInsets.symmetric(horizontal: 20),
+                                              child: infoController.seasonsList.value[index].posterPath==null? Container(
+                                                  height: MediaQuery.of(context).size.height*0.4,
+                                                  width: MediaQuery.of(context).size.width*0.5,
                                                   decoration: BoxDecoration(
-                                                    shape: BoxShape.rectangle,
-                                                    borderRadius: BorderRadius.all(Radius.circular(35)),
-                                                    color: Colors.transparent,
-                                                    image: DecorationImage(image: AssetImage('assets/images/service_out1.jpg'),
-                                                      fit: BoxFit.contain,
-                                                    ),
-                                                  ),
-                                                ),
-                                                imageBuilder: (context,imageProvider)=> Stack(
-                                                  children: [
-                                                    Container(
-                                                      width: MediaQuery.of(context).size.width*0.6,
-                                                      margin: EdgeInsets.symmetric(horizontal: 5.0),
-                                                      decoration: BoxDecoration(
-                                                        shape: BoxShape.rectangle,
-                                                        borderRadius: BorderRadius.all(Radius.circular(35)),
-                                                        color: Colors.transparent,
-                                                        image: DecorationImage(image: imageProvider,
+                                                      shape: BoxShape.rectangle,
+                                                      borderRadius: BorderRadius.circular(30),
+                                                      image: DecorationImage(
+                                                          filterQuality: FilterQuality.high,
                                                           fit: BoxFit.cover,
-                                                        ),
-                                                      ),
-                                                    ),
-
-                                                    Positioned(
-                                                      bottom: 0,
-                                                      left: 5,
-                                                      width: MediaQuery.of(context).size.width*0.6,
-                                                      child: Obx(()=>
-                                                          Container(
-                                                            height: 100,
-                                                            decoration: BoxDecoration(
-                                                                color: themeController.isDarkModeEnabled.value==false?
-                                                                Colors.white.withOpacity(0.4):
-                                                                Colors.black.withOpacity(0.4),
-                                                                shape: BoxShape.rectangle,
-                                                                borderRadius: BorderRadius.circular(35)
-                                                            ),
-
-                                                            child: Column(
-                                                              mainAxisAlignment: MainAxisAlignment.center,
-                                                              children: [
-                                                                Obx(()=>
-                                                                    Text.rich(
-                                                                      TextSpan(
-                                                                          children:[
-                                                                            TextSpan(text: 'Season ',style: TextStyle(fontSize: 20,fontWeight: FontWeight.w600)),
-                                                                            TextSpan(text: '${infoController.seasonsList.value[index].seasonNumber}',style: TextStyle(fontSize: 20,fontWeight: FontWeight.w400,color: Colors.pinkAccent)),
-                                                                          ]
-                                                                      ),
-                                                                      textAlign: TextAlign.center,
-                                                                    ),
-                                                                ),
-
-                                                                Padding(
-                                                                  padding: const EdgeInsets.symmetric(horizontal: 5),
-                                                                  child: Obx(()=> Text.rich(
-                                                                    TextSpan(
-                                                                        children:[
-                                                                          TextSpan(text: '${infoController.seasonsList.value[index].episodes!.length}',style: TextStyle(fontSize: 20,fontWeight: FontWeight.w400,color: Colors.pinkAccent)),
-                                                                          TextSpan(text: ' Episodes ',style: TextStyle(fontSize: 20,fontWeight: FontWeight.w600)),
-                                                                        ]
-                                                                    ),
-                                                                    textAlign: TextAlign.center,
-                                                                  ),
-                                                                  ),
-                                                                ),
-
-                                                              ],
-                                                            ),
-
-                                                          ),
-                                                      ),
-
-                                                    ),
-
-                                                  ],
-                                                ),
+                                                          image:
+                                                          AssetImage('assets/images/empty1.jpg')
+                                                      )
+                                                  )
+                                              ): Container(
+                                                  height: MediaQuery.of(context).size.height*0.4,
+                                                  width: MediaQuery.of(context).size.width*0.5,
+                                                  decoration: BoxDecoration(
+                                                      shape: BoxShape.rectangle,
+                                                      borderRadius: BorderRadius.circular(30),
+                                                      image: DecorationImage(
+                                                          filterQuality: FilterQuality.high,
+                                                          fit: BoxFit.cover,
+                                                          image:
+                                                          NetworkImage(imageTmdbApiLink+ infoController.seasonsList.value[index].posterPath!)
+                                                      )
+                                                  )
                                               ),
-
-                                            ],
+                                            ),
                                           ),
-                                        ),
-                                      );},
+
+                                          SizedBox(
+                                            width: MediaQuery.of(context).size.width*0.4,
+                                            child: Center(
+                                              child:  Obx(()=>
+                                                  Text.rich(
+                                                    TextSpan(
+                                                        children:[
+                                                          TextSpan(text: 'Season ',style: GoogleFonts.lato(
+                                                            fontSize: 18,
+                                                            color: themeController.isDarkModeEnabled.value?Colors.grey[100]:Colors.grey[900]
+                                                          )),
+                                                          TextSpan(text: '${infoController.seasonsList.value[index].seasonNumber}',style: GoogleFonts.lato(
+                                                            fontSize: 18,
+                                                            color: Colors.pinkAccent,
+                                                            fontWeight: FontWeight.w400
+                                                          )),
+                                                        ]
+                                                    ),
+                                                    textAlign: TextAlign.center,
+                                                  ),
+                                              ),
+                                            ),
+                                          ),
+
+                                          SizedBox(
+                                            child: Obx(()=> Text.rich(
+                                              TextSpan(
+                                                  children:[
+                                                    TextSpan(text: '${infoController.seasonsList.value[index].episodes!.length}',style: GoogleFonts.lato(
+                                                      fontSize: 18,
+                                                      color: Colors.pinkAccent,
+                                                      fontWeight: FontWeight.w400
+                                                    )),
+                                                    TextSpan(text: ' Episodes ',style: GoogleFonts.lato(
+                                                      fontSize: 18,
+                                                      color: themeController.isDarkModeEnabled.value?Colors.grey[100]:Colors.grey[900]
+                                                    )),
+                                                  ]
+                                              ),
+                                              textAlign: TextAlign.center,
+                                            ),
+                                            ),
+                                          ),
+
+                                        ],
+                                      );
+                                    },
 
                               ),
                             ),
@@ -612,35 +610,43 @@ class _SeriesDetailsScreenState extends State<SeriesDetailsScreen> {
                         )
                 ),
 
-                SizedBox(height: 20,),
+                Obx(()=>  infoController.seriesVideosList.value.isEmpty? Container(width: 0,height: 0,):
+                SizedBox(height: 20,)),
 
-                Padding(
-                  padding: EdgeInsets.symmetric(vertical: 10, horizontal: 10),
-                  child: Text(
-                    'Trailer',
-                    style: Theme.of(context).textTheme.headline5,
+                Obx(()=>
+                infoController.seriesVideosList.value.isEmpty?  Container(
+                      width: 0,
+                      height: 0,
+                    ):Padding(
+                    padding: EdgeInsets.symmetric(vertical: 10, horizontal: 10),
+                    child: Text(
+                      'Trailer',
+                      style: Theme.of(context).textTheme.headline5,
+                    ),
                   ),
                 ),
                 SizedBox(
                   height: 5,
                 ),
 
-                Obx(() => infoController.seriesVideosList.value.isNotEmpty
-                    ? CarouselVideosWidget(
-                        videosList: infoController.seriesVideosList.value)
-                    : Center(
-                        child: CircularProgressIndicator(),
-                      )),
+        Obx(()=>
+        infoController.seriesVideosList.value.isEmpty?  Container(
+          width: 0,
+          height: 0,
+        ): CarouselVideosWidget(
+                        videosList: infoController.seriesVideosList.value),
+        ),
 
                 SizedBox(
                   height: 10,
                 ),
 
                 Obx(
-                  () => infoController.castList.value.isEmpty
-                      ? Center(
-                          child: CircularProgressIndicator(),
-                        )
+                  () => infoController.fullCastList.value.isEmpty
+                      ? Container(
+                    width: 0,
+                    height: 0,
+                  )
                       : Padding(
                           padding: EdgeInsets.all(10),
                           child: Column(
@@ -662,26 +668,25 @@ class _SeriesDetailsScreenState extends State<SeriesDetailsScreen> {
                                         left: 10.0, right: 10),
                                     child: ListView.builder(
                                         scrollDirection: Axis.horizontal,
-                                        itemCount: infoController
-                                            .castList.value.length,
+                                        itemCount: infoController.fullCastList.value.length,
                                         itemBuilder: (context, index) {
                                           return GestureDetector(
-                                              onTap: () {
-                                                Get.to(() => FullPersonDetails(
-                                                      personModel:
-                                                          infoController
-                                                              .castList
-                                                              .value[index],
-                                                    ));
+                                              onTap: () async{
+
+
+                                                if(infoController.fullCastList.value[index].id != null){
+                                                  PersonModel personModel = await infoController.getActorAsPersonModel(infoController.fullCastList.value[index].id!);
+                                                  Get.to(()=>FullPersonDetails(personModel:
+                                                  personModel,));
+                                                }
+
                                               },
                                               child: CachedNetworkImage(
-                                                  imageUrl: infoController
-                                                      .castList
+                                                  imageUrl: infoController.fullCastList
                                                       .value[index]
                                                       .profilePath!= null?
                                                   imageTmdbApiLink +
-                                                      infoController
-                                                          .castList
+                                                      infoController.fullCastList
                                                           .value[index]
                                                           .profilePath!
                                                   :errorImageUrl,
@@ -749,15 +754,13 @@ class _SeriesDetailsScreenState extends State<SeriesDetailsScreen> {
                                                               height: 10,
                                                             ),
                                                             Text(
-                                                              infoController
-                                                                          .castList
+                                                              infoController.fullCastList
                                                                           .value[
                                                                               index]
                                                                           .name ==
                                                                       null
                                                                   ? ''
-                                                                  : infoController
-                                                                      .castList
+                                                                  : infoController.fullCastList
                                                                       .value[
                                                                           index]
                                                                       .name!,
@@ -782,25 +785,27 @@ class _SeriesDetailsScreenState extends State<SeriesDetailsScreen> {
                         ),
                 ),
 
-                Padding(
+                Obx(()=>
+                infoController.fullCrewList.value.isEmpty?Container(
+                  width: 0,
+                  height: 0,
+                ):Padding(
                   padding: EdgeInsets.only(left: 0),
                   child: Column(
                     children: [
                       Text(
-                        'Director(s)',
+                        'Crew',
                         style: Theme.of(context).textTheme.headline5,
                       ),
                       Padding(
                         padding: const EdgeInsets.only(left: 20, right: 10),
                         child: SizedBox(
-                          height: 130,
-                          child: Obx(()=>
-                          infoController.direcList.value.isEmpty
-                              ? LoadingWidget()
-                              : ListView.builder(
+                          height: 160,
+                          child:
+                           ListView.builder(
                               scrollDirection: Axis.horizontal,
                               itemCount:
-                              infoController.direcList.value.length,
+                              infoController.fullCrewList.value.length,
                               itemBuilder:
                                   (context, index) => GestureDetector(
                                 onTap: () {
@@ -816,7 +821,7 @@ class _SeriesDetailsScreenState extends State<SeriesDetailsScreen> {
                                     MainAxisAlignment.center,
                                     children: [
                                       infoController
-                                          .direcList
+                                          .fullCrewList
                                           .value[index]
                                           .profilePath !=
                                           null
@@ -828,7 +833,7 @@ class _SeriesDetailsScreenState extends State<SeriesDetailsScreen> {
                                                 image: NetworkImage(
                                                   imageTmdbApiLink +
                                                       infoController
-                                                          .direcList
+                                                          .fullCrewList
                                                           .value[
                                                       index]
                                                           .profilePath!,
@@ -843,7 +848,7 @@ class _SeriesDetailsScreenState extends State<SeriesDetailsScreen> {
                                             BoxShape.circle,
                                             image: DecorationImage(
                                                 image: AssetImage(
-                                                    'assets/images/service_out1.jpg'),
+                                                    'assets/images/empty1.jpg'),
                                                 fit: BoxFit
                                                     .cover,
                                                 filterQuality:
@@ -855,12 +860,12 @@ class _SeriesDetailsScreenState extends State<SeriesDetailsScreen> {
                                       ),
                                       Text(
                                         infoController
-                                            .direcList
+                                            .fullCrewList
                                             .value[index]
                                             .name ==
                                             null
                                             ? ''
-                                            : infoController.direcList
+                                            : infoController.fullCrewList
                                             .value[index].name!,
                                         textAlign: TextAlign.center,
                                         style: Theme.of(context)
@@ -868,30 +873,46 @@ class _SeriesDetailsScreenState extends State<SeriesDetailsScreen> {
                                             .bodyText2,
                                         maxLines: 2,
                                       ),
+                                      SizedBox(
+                                        height: 5,
+                                      ),
+                                      Text(infoController.fullCrewList.value[index].job!,textAlign: TextAlign.center,
+                                        overflow: TextOverflow.ellipsis,maxLines: 2,style: GoogleFonts.lato(
+                                            fontSize: 12,
+                                            color: themeController.isDarkModeEnabled.value?Colors.grey[100]:Colors.grey[900]
+                                        ),)
                                     ],
                                   ),
                                 ),
-                              )),
+                              )
                           ),
                         ),
                       ),
                     ],
                   ),
                 ),
+                ),
 
 
-                Padding(
-                  padding: EdgeInsets.symmetric(vertical: 5, horizontal: 10),
-                  child: Text(
-                    'Writers & Authors',
-                    style: Theme.of(context).textTheme.headline5,
+                Obx(()=>
+                infoController.seriesOmdbDetails.value ==null?
+                Container(
+                  width: 0,
+                  height: 0,
+                ): infoController.seriesOmdbDetails.value!.writer==null?Container(): Padding(
+                    padding: EdgeInsets.symmetric(vertical: 5, horizontal: 10),
+                    child: Text(
+                      'Writers & Authors',
+                      style: Theme.of(context).textTheme.headline5,
+                    ),
                   ),
                 ),
                 Obx(()=>
                 infoController.seriesOmdbDetails.value ==null?
-                Center(
-                  child: CircularProgressIndicator(),
-                ) : Padding(
+                Container(
+                  width: 0,
+                  height: 0,
+                ): infoController.seriesOmdbDetails.value!.writer ==null? Container(): Padding(
                   padding: EdgeInsets.symmetric(
                     horizontal: 20,
                   ),
@@ -911,8 +932,9 @@ class _SeriesDetailsScreenState extends State<SeriesDetailsScreen> {
 
                 Obx(()=>
                 infoController.seriesOmdbDetails.value ==null?
-                Center(
-                  child: CircularProgressIndicator(),
+                Container(
+                  width: 0,
+                  height: 0,
                 )
                     : Padding(
                   padding: EdgeInsets.symmetric(
@@ -937,8 +959,9 @@ class _SeriesDetailsScreenState extends State<SeriesDetailsScreen> {
                 ),
                 Obx(()=>
                 infoController.seriesOmdbDetails.value ==null?
-                Center(
-                  child: CircularProgressIndicator(),
+                Container(
+                  width: 0,
+                  height: 0,
                 ) : Padding(
                   padding: EdgeInsets.symmetric(
                     horizontal: 20,
@@ -962,8 +985,9 @@ class _SeriesDetailsScreenState extends State<SeriesDetailsScreen> {
                 ),
                 Obx(()=>
                 infoController.seriesOmdbDetails.value ==null?
-                Center(
-                  child: CircularProgressIndicator(),
+                Container(
+                  width: 0,
+                  height: 0,
                 ) : Padding(
                   padding: EdgeInsets.symmetric(
                     horizontal: 20,

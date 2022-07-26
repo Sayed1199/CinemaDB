@@ -8,11 +8,13 @@ import 'package:cinema_db/widgets/home_appbar.dart';
 import 'package:cinema_db/widgets/home_categories_widget.dart';
 import 'package:cinema_db/widgets/image_error_widget.dart';
 import 'package:cinema_db/widgets/loading_widget.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:get/get.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:toggle_switch/toggle_switch.dart';
 
 class HomeMoviesScreen extends StatefulWidget {
@@ -43,13 +45,17 @@ class _HomeMoviesScreenState extends State<HomeMoviesScreen> {
           Obx(()=>controller.allMoviesList.value.isNotEmpty?
           MovieCard(controller: controller, carouselController: carouselController):LoadingWidget(),),
           SizedBox(height: 20,),
-          controller.allMoviesList.value.isNotEmpty?
-          MovieTitle(controller: controller):Container(),
+          Obx(()=>
+             controller.allMoviesList.value.isNotEmpty?
+            MovieTitle(controller: controller):Container(),
+          ),
           SizedBox(height: 10,),
-          controller.allMoviesList.value.isNotEmpty?MovieRating(controller: controller):Container(),
+          Obx(()=>controller.allMoviesList.value.isNotEmpty?MovieRating(controller: controller):Container()),
           SizedBox(height: 10,),
-          controller.allMoviesList.value.isNotEmpty?
-          MovieRatingText(controller: controller):Container(),
+          Obx(()=>
+             controller.allMoviesList.value.isNotEmpty?
+            MovieRatingText(controller: controller):Container(),
+          ),
           SizedBox(height: 20,),
 
           TrendingToggleWidget(controller: controller),
@@ -59,10 +65,8 @@ class _HomeMoviesScreenState extends State<HomeMoviesScreen> {
           Obx(()=>controller.trendingMoviesList.value.isNotEmpty?
           TrendingMoviesList(controller: controller, themeController: themeController):LoadingWidget(),),
 
-          SizedBox(height: 20,),
-
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20),
+            padding: const EdgeInsets.symmetric(horizontal: 20,vertical: 0),
             child: Text('Recommended Movies',textAlign: TextAlign.start,
               style: TextStyle(fontSize: 18,fontWeight: FontWeight.w500),),
           ),
@@ -270,97 +274,73 @@ class TrendingMoviesList extends StatelessWidget {
   final ThemeController themeController;
   TrendingMoviesList({Key? key,required this.controller,required this.themeController}) : super(key: key);
 
-  double height=300;
-
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(10,5,10,10),
+      padding: const EdgeInsets.fromLTRB(5,5,5,10),
       child: SizedBox(
-        height: height,
+        height: MediaQuery.of(context).size.height*0.5,
+        width: MediaQuery.of(context).size.width,
         child: Obx(()=>
             ListView.builder(
               shrinkWrap: true,
               scrollDirection: Axis.horizontal,
               itemCount: controller.trendingMoviesList.value.length,
               itemBuilder: (context,index){
-                return GestureDetector(
-                  onTap: (){
-                    MovieModel e = controller.trendingMoviesList.value[index];
-                    Get.to(MovieDetails(),arguments: e,transition: Transition.rightToLeft,curve: Curves.bounceInOut);
-                  },
-                  child: Container(
-                    child: Stack(
-                      children: [
-                        CachedNetworkImage(imageUrl: imageTmdbApiLink+controller.trendingMoviesList.value[index].posterPath!,
-                          progressIndicatorBuilder: (context, url, downloadProgress) =>
-                              Center(child: CircularProgressIndicator(value: downloadProgress.progress)),
-                          errorWidget: (context,url,err)=>ImageErrorWidget(),
-                          imageBuilder: (context,imageProvider)=> Stack(
-                            children: [
-                              Container(
-                                width: MediaQuery.of(context).size.width/2,
-                                margin: EdgeInsets.symmetric(horizontal: 5.0),
-                                decoration: BoxDecoration(
+                return Column(
+                    children: [
+                      GestureDetector(
+                        onTap: (){
+                          MovieModel e = controller.trendingMoviesList.value[index];
+                          Get.to(MovieDetails(),arguments: e,transition: Transition.rightToLeft,curve: Curves.bounceInOut);
+                        },
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 20),
+                          child: controller.trendingMoviesList.value[index].posterPath==null? Container(
+                              height: MediaQuery.of(context).size.height*0.4,
+                              width: MediaQuery.of(context).size.width*0.5,
+                              decoration: BoxDecoration(
                                   shape: BoxShape.rectangle,
-                                  borderRadius: BorderRadius.all(Radius.circular(35)),
-                                  color: Colors.transparent,
-                                  image: DecorationImage(image: imageProvider,
-                                    fit: BoxFit.cover,
-                                  ),
-                                ),
-                              ),
-
-                              Positioned(
-                                bottom: 0,
-                                left: 5,
-                                width: MediaQuery.of(context).size.width/2,
-                                child: Obx(()=>
-                                    Container(
-                                      height: 80,
-                                      decoration: BoxDecoration(
-                                          color: themeController.isDarkModeEnabled.value==false?
-                                          Colors.white.withOpacity(0.4):
-                                          Colors.black.withOpacity(0.4),
-                                          shape: BoxShape.rectangle,
-                                          borderRadius: BorderRadius.circular(25)
-                                      ),
-
-                                      child: Column(
-                                        mainAxisAlignment: MainAxisAlignment.center,
-                                        children: [
-                                          Padding(
-                                            padding: const EdgeInsets.symmetric(horizontal: 5),
-                                            child: Obx(()=> Text(controller.trendingMoviesList.value[index].title!,textAlign: TextAlign.center,maxLines: 2,style: TextStyle(fontSize: 18),overflow: TextOverflow.ellipsis,)),
-                                          ),
-                                          Obx(()=>
-                                              Text.rich(
-                                                TextSpan(
-                                                    children:[
-                                                      TextSpan(text: '${(double.parse((controller.trendingMoviesList.value[index].voteAverage)!)/2).toStringAsFixed(1)}',style: TextStyle(fontSize: 20,fontWeight: FontWeight.w400,color: Colors.pinkAccent)),
-                                                      TextSpan(text: ' / ',style: TextStyle(fontSize: 25,fontWeight: FontWeight.w800)),
-                                                      TextSpan(text: '5',style: TextStyle(fontSize: 22,fontWeight: FontWeight.w600)),
-                                                    ]
-                                                ),
-                                                textAlign: TextAlign.center,
-                                              ),
-                                          ),
-                                        ],
-                                      ),
-
-                                    ),
-                                ),
-
-                              ),
-
-                            ],
+                                  borderRadius: BorderRadius.circular(30),
+                                  image: DecorationImage(
+                                      filterQuality: FilterQuality.high,
+                                      fit: BoxFit.cover,
+                                      image:
+                                      AssetImage('assets/images/empty1.jpg')
+                                  )
+                              )
+                          ): Container(
+                              height: MediaQuery.of(context).size.height*0.4,
+                              width: MediaQuery.of(context).size.width*0.5,
+                              decoration: BoxDecoration(
+                                  shape: BoxShape.rectangle,
+                                  borderRadius: BorderRadius.circular(30),
+                                  image: DecorationImage(
+                                      filterQuality: FilterQuality.high,
+                                      fit: BoxFit.cover,
+                                      image:
+                                      NetworkImage(imageTmdbApiLink+ controller.trendingMoviesList.value[index].posterPath!)
+                                  )
+                              )
                           ),
                         ),
+                      ),
 
-                      ],
-                    ),
-                  ),
-                );},
+                      SizedBox(
+                        width: MediaQuery.of(context).size.width*0.4,
+                        child: Center(
+                          child: Obx(()=>
+                              Text(controller.trendingMoviesList.value[index].title==null?'':controller.trendingMoviesList.value[index].title!,
+                                maxLines: 2,textAlign: TextAlign.center,overflow:TextOverflow.ellipsis, style: GoogleFonts.lato(
+                                    fontSize: 16,
+                                    color: themeController.isDarkModeEnabled.value?Colors.grey[100]:Colors.grey[900]
+                                ),),
+                          ),
+                        ),),
+
+                    ],
+                  );
+                },
             ),
         ),
       ),
@@ -377,92 +357,72 @@ class RecommendedMovies extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(10,5,10,10),
+      padding: const EdgeInsets.fromLTRB(10,10,10,10),
       child: SizedBox(
-        height: 300,
+        height: MediaQuery.of(context).size.height*0.5,
+        width: MediaQuery.of(context).size.width,
         child: Obx(()=>
             ListView.builder(
               shrinkWrap: true,
               scrollDirection: Axis.horizontal,
               itemCount: controller.recommendedMoviesList.value.length,
               itemBuilder: (context,index){
-                return GestureDetector(
-                  onTap: (){
-                    MovieModel e = controller.recommendedMoviesList.value[index];
-                    Get.to(MovieDetails(),arguments: e,transition: Transition.size,curve: Curves.bounceInOut);
-                  },
-                  child: Container(
-                    child: Stack(
-                      children: [
-                        CachedNetworkImage(imageUrl: imageTmdbApiLink+controller.recommendedMoviesList.value[index].posterPath!,
-                          progressIndicatorBuilder: (context, url, downloadProgress) =>
-                              Center(child: CircularProgressIndicator(value: downloadProgress.progress)),
-                          errorWidget: (context,url,err)=>ImageErrorWidget(),
-                          imageBuilder: (context,imageProvider)=> Stack(
-                            children: [
-                              Container(
-                                width: MediaQuery.of(context).size.width/2,
-                                margin: EdgeInsets.symmetric(horizontal: 5.0),
-                                decoration: BoxDecoration(
-                                  shape: BoxShape.rectangle,
-                                  borderRadius: BorderRadius.all(Radius.circular(35)),
-                                  color: Colors.transparent,
-                                  image: DecorationImage(image: imageProvider,
+                return Column(
+                  children: [
+                    GestureDetector(
+                      onTap: (){
+                        MovieModel e = controller.recommendedMoviesList.value[index];
+                        Get.to(MovieDetails(),arguments: e,transition: Transition.size,curve: Curves.bounceInOut);
+                      },
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 20),
+                        child:  controller.recommendedMoviesList.value[index].posterPath==null? Container(
+                            height: MediaQuery.of(context).size.height*0.4,
+                            width: MediaQuery.of(context).size.width*0.5,
+                            decoration: BoxDecoration(
+                                shape: BoxShape.rectangle,
+                                borderRadius: BorderRadius.circular(30),
+                                image: DecorationImage(
+                                    filterQuality: FilterQuality.high,
                                     fit: BoxFit.cover,
-                                  ),
-                                ),
-                              ),
-
-                              Positioned(
-                                bottom: 0,
-                                left: 5,
-                                width: MediaQuery.of(context).size.width/2,
-                                child: Obx(()=>
-                                    Container(
-                                      height: 80,
-                                      decoration: BoxDecoration(
-                                          color: themeController.isDarkModeEnabled.value==false?
-                                          Colors.white.withOpacity(0.4):
-                                          Colors.black.withOpacity(0.4),
-                                          shape: BoxShape.rectangle,
-                                          borderRadius: BorderRadius.circular(25)
-                                      ),
-
-                                      child: Column(
-                                        mainAxisAlignment: MainAxisAlignment.center,
-                                        children: [
-                                          Padding(
-                                            padding: const EdgeInsets.symmetric(horizontal: 5),
-                                            child: Obx(()=> Text(controller.recommendedMoviesList.value[index].title!,textAlign: TextAlign.center,maxLines: 2,style: TextStyle(fontSize: 18),overflow: TextOverflow.ellipsis,)),
-                                          ),
-                                          Obx(()=>
-                                              Text.rich(
-                                                TextSpan(
-                                                    children:[
-                                                      TextSpan(text: '${(double.parse((controller.recommendedMoviesList.value[index].voteAverage)!)/2).toStringAsFixed(1)}',style: TextStyle(fontSize: 20,fontWeight: FontWeight.w400,color: Colors.pinkAccent)),
-                                                      TextSpan(text: ' / ',style: TextStyle(fontSize: 25,fontWeight: FontWeight.w800)),
-                                                      TextSpan(text: '5',style: TextStyle(fontSize: 22,fontWeight: FontWeight.w600)),
-                                                    ]
-                                                ),
-                                                textAlign: TextAlign.center,
-                                              ),
-                                          ),
-                                        ],
-                                      ),
-
-                                    ),
-                                ),
-
-                              ),
-
-                            ],
-                          ),
+                                    image:
+                                    AssetImage('assets/images/empty1.jpg')
+                                )
+                            )
+                        ): Container(
+                            height: MediaQuery.of(context).size.height*0.4,
+                            width: MediaQuery.of(context).size.width*0.5,
+                            decoration: BoxDecoration(
+                                shape: BoxShape.rectangle,
+                                borderRadius: BorderRadius.circular(30),
+                                image: DecorationImage(
+                                    filterQuality: FilterQuality.high,
+                                    fit: BoxFit.cover,
+                                    image:
+                                    NetworkImage(imageTmdbApiLink+ controller.recommendedMoviesList.value[index].posterPath!)
+                                )
+                            )
                         ),
-
-                      ],
+                      ),
                     ),
-                  ),
-                );},
+
+                    SizedBox(
+                      width: MediaQuery.of(context).size.width*0.4,
+                      child: Center(
+                        child: Obx(()=>
+                            Text(controller.recommendedMoviesList.value[index].title==null?'':controller.recommendedMoviesList.value[index].title!,
+                              maxLines: 2,textAlign: TextAlign.center,overflow:TextOverflow.ellipsis, style: GoogleFonts.lato(
+                                  fontSize: 16,
+                                  color: themeController.isDarkModeEnabled.value?Colors.grey[100]:Colors.grey[900]
+                              ),),
+                        ),
+                      ),),
+
+
+                  ],
+                );
+
+                },
             ),
         ),
       ),
